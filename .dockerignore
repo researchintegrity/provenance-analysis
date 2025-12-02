@@ -1,0 +1,90 @@
+# Git
+.git
+.gitignore
+.dockerignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+venv
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.pytest_cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.cache
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Test files and outputs
+test_*.py
+*_test.py
+tests/
+test_output_groups_1_5/
+microservice_output/
+provenance-test/
+notebooks/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Development files
+Makefile
+docker-compose*.yml
+*.sh
+
+# Large data files (uncomment if not needed in container)
+# dataset/
+# dataset/backup/
+# dataset/panel_groups/
+
+# Note: Uncomment dataset lines above if your container doesn't need the full dataset
+# The dataset might be mounted as a volume instead
