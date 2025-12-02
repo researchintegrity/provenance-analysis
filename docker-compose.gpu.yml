@@ -1,0 +1,19 @@
+# Docker Compose override for GPU support
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
+
+version: "3.8"
+
+services:
+  cbir-service:
+    build:
+      context: ../cbir-system
+      dockerfile: docker/Dockerfile.gpu
+    environment:
+      - MODEL_DEVICE=cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

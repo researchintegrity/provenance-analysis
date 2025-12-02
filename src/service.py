@@ -78,6 +78,16 @@ class ProvenanceMicroservice:
         """
         self.cbir = cbir_client
         self.default_output_dir = default_output_dir or tempfile.mkdtemp(prefix="provenance_")
+    
+    def _apply_path_mapping(self, path: str) -> str:
+        """Apply path mapping from CBIR client to convert external paths to internal paths."""
+        path_mapping = getattr(self.cbir, 'path_mapping', None)
+        if not path_mapping:
+            return path
+        for local_prefix, remote_prefix in path_mapping.items():
+            if path.startswith(local_prefix):
+                return path.replace(local_prefix, remote_prefix, 1)
+        return path
         
     def analyze(self, request: MicroserviceAnalysisRequest) -> MicroserviceAnalysisResponse:
         """
@@ -125,11 +135,16 @@ class ProvenanceMicroservice:
         # Step 2: Initialize Descriptor Manager
         # ================================================================
         step_start = time.time()
+        
+        # Get path mapping from CBIR client if available
+        path_mapping = getattr(self.cbir, 'path_mapping', None)
+        
         descriptor_manager = DescriptorManager(
             output_dir=output_dir,
             max_workers=request.max_workers,
             descriptor_type=request.descriptor_type,
-            extract_flip=request.extract_flip
+            extract_flip=request.extract_flip,
+            path_mapping=path_mapping
         )
         descriptor_manager.start()
         timings['init_descriptor_manager'] = time.time() - step_start
@@ -266,14 +281,14 @@ class ProvenanceMicroservice:
                     warnings.append(f"Failed to get descriptors for pair {task.source_id}-{task.target_id}")
                     continue
                 
-                # Perform matching
+                # Perform matching (apply path mapping for image loading)
                 try:
                     match_start = time.time()
                     match_result = match_images(
-                        image1_path=source_img.path,
+                        image1_path=self._apply_path_mapping(source_img.path),
                         keypoints1=desc1['keypoints'],
                         descriptors1=desc1['descriptors'],
-                        image2_path=target_img.path,
+                        image2_path=self._apply_path_mapping(target_img.path),
                         keypoints2=desc2['keypoints'],
                         descriptors2=desc2['descriptors'],
                         flip_keypoints1=desc1.get('flip_keypoints'),

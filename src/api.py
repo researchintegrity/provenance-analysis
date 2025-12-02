@@ -231,11 +231,14 @@ def health_check():
     cbir_connected = False
     
     try:
-        # Try to get CBIR client and check connectivity
-        if _cbir_client is not None:
-            # Try a simple operation
-            _cbir_client.check_visibility([])
-            cbir_connected = True
+        # Get or create CBIR client and check connectivity
+        global _cbir_client
+        if _cbir_client is None:
+            _cbir_client = get_cbir_client()
+        
+        # Try a health check on the CBIR client
+        health_info = _cbir_client.health_check()
+        cbir_connected = health_info.get("healthy", False)
     except Exception as e:
         logger.warning(f"CBIR health check failed: {e}")
     

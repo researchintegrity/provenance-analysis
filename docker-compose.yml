@@ -1,0 +1,66 @@
+version: "3.8"
+
+# Provenance Analysis Microservices Stack
+# This compose file orchestrates ONLY the provenance analysis service.
+# It connects to the existing CBIR system running on port 8001.
+#
+# If you need to run the full stack (including CBIR), use the docker-compose
+# in the cbir-system directory first, then run this one.
+
+services:
+  # =============================================================================
+  # Provenance Analysis Service
+  # =============================================================================
+  
+  provenance-service:
+    container_name: provenance-service
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "${PROVENANCE_PORT:-8002}:8000"
+    volumes:
+      # Mount source for development
+      - ./src:/app/src
+      # Descriptor cache directory
+      - provenance_output:/app/output
+      # Shared workspace for image data (same as CBIR)
+      - ${DATA_PATH:-./data}:/workspace
+    environment:
+      # CBIR connection - connects to existing CBIR service
+      - CBIR_ENDPOINT=${CBIR_ENDPOINT:-http://host.docker.internal:8001}
+      - CBIR_USER_ID=${CBIR_USER_ID:-provenance_service}
+      # Output directory for descriptors
+      - PROVENANCE_OUTPUT_DIR=/app/output
+      # Path mapping (container paths)
+      - LOCAL_DATA_PATH=${LOCAL_DATA_PATH:-}
+      - REMOTE_DATA_PATH=/workspace
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - provenance-network
+
+# =============================================================================
+# Networks
+# =============================================================================
+
+networks:
+  provenance-network:
+    driver: bridge
+    name: provenance-network
+
+# =============================================================================
+# Volumes
+# =============================================================================
+
+volumes:
+  provenance_output:
+    name: provenance-output-data

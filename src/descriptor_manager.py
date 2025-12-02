@@ -72,13 +72,15 @@ class DescriptorManager:
         output_dir: str,
         max_workers: int = 4,
         descriptor_type: DescriptorType = DescriptorType.CV_RSIFT,
-        extract_flip: bool = True
+        extract_flip: bool = True,
+        path_mapping: Optional[Dict[str, str]] = None
     ):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.max_workers = max_workers
         self.descriptor_type = descriptor_type
         self.extract_flip = extract_flip
+        self.path_mapping = path_mapping or {}  # local_prefix -> container_prefix
         
         # Thread-safe structures
         self._lock = threading.RLock()
@@ -116,6 +118,20 @@ class DescriptorManager:
             self._executor = None
             
         logger.info("DescriptorManager shutdown complete")
+    
+    def _apply_path_mapping(self, path: str) -> str:
+        """
+        Apply path mapping to convert external paths to internal container paths.
+        
+        If path_mapping is {'/host/data': '/container/data'} and path is
+        '/host/data/images/img.png', returns '/container/data/images/img.png'.
+        """
+        for local_prefix, remote_prefix in self.path_mapping.items():
+            if path.startswith(local_prefix):
+                mapped = path.replace(local_prefix, remote_prefix, 1)
+                logger.debug(f"Path mapping: {path} -> {mapped}")
+                return mapped
+        return path
     
     def _get_descriptor_paths(self, image_id: str) -> Dict[str, str]:
         """Get the file paths for an image's descriptors."""
@@ -169,10 +185,13 @@ class DescriptorManager:
                         self._events[image_id].set()
                 return cached
             
+            # Apply path mapping to get the actual file path
+            actual_path = self._apply_path_mapping(task.image_path)
+            
             # Extract descriptors
             logger.info(f"Extracting descriptors for {image_id} using {task.descriptor_type.value}")
             result = extract_descriptors(
-                task.image_path, 
+                actual_path, 
                 descriptor_type=task.descriptor_type,
                 extract_flip=self.extract_flip
             )
