@@ -6,7 +6,7 @@ provenance Docker container.
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from enum import Enum
 
 
@@ -311,3 +311,182 @@ class ContainerOutput(BaseModel):
     match_response: Optional[PairwiseMatchResponse] = None
     batch_response: Optional[BatchMatchResponse] = None
     provenance_response: Optional[ProvenanceResponse] = None
+
+
+# ============================================================================
+# Microservice API Schemas
+# ============================================================================
+
+class MicroserviceImageInput(BaseModel):
+    """Image input for microservice requests."""
+    id: str = Field(..., description="Unique image identifier")
+    path: str = Field(..., description="Path to the image file")
+    label: Optional[str] = Field(default=None, description="Image label/category")
+
+
+class MicroserviceAnalysisRequest(BaseModel):
+    """
+    Request for provenance analysis microservice.
+    
+    The microservice will:
+    1. Check visibility of all images in CBIR
+    2. Index any missing images in batches
+    3. Query CBIR for Top-K similar images
+    4. Extract descriptors in parallel
+    5. Perform matching and expansion (Top-Q)
+    6. Build provenance graph
+    """
+    # Input images
+    images: List[MicroserviceImageInput] = Field(
+        ..., 
+        description="List of images available for analysis"
+    )
+    query_image: MicroserviceImageInput = Field(
+        ..., 
+        description="The query image to analyze provenance for"
+    )
+    
+    # CBIR parameters
+    k: int = Field(
+        default=10, 
+        ge=1, 
+        le=100,
+        description="Number of top candidates from initial CBIR search"
+    )
+    q: int = Field(
+        default=5, 
+        ge=1, 
+        le=50,
+        description="Number of top candidates for expansion searches"
+    )
+    max_depth: int = Field(
+        default=3,
+        ge=1,
+        le=10,
+        description="Maximum expansion depth (1 = no expansion)"
+    )
+    
+    # Descriptor parameters
+    descriptor_type: DescriptorType = Field(
+        default=DescriptorType.CV_RSIFT,
+        description="Type of keypoint descriptor to use"
+    )
+    extract_flip: bool = Field(
+        default=True,
+        description="Also extract descriptors from flipped images"
+    )
+    
+    # Matching parameters
+    alignment_strategy: AlignmentStrategy = Field(
+        default=AlignmentStrategy.CV_MAGSAC,
+        description="Geometric alignment strategy"
+    )
+    matching_method: MatchingMethod = Field(
+        default=MatchingMethod.BF,
+        description="Keypoint matching method"
+    )
+    min_keypoints: int = Field(
+        default=20,
+        ge=4,
+        description="Minimum matching keypoints for a valid match"
+    )
+    min_area: float = Field(
+        default=0.01,
+        ge=0.0,
+        le=1.0,
+        description="Minimum shared area threshold"
+    )
+    
+    # Processing parameters
+    max_workers: int = Field(
+        default=4,
+        ge=1,
+        le=16,
+        description="Maximum parallel workers for descriptor extraction"
+    )
+    cbir_batch_size: int = Field(
+        default=32,
+        ge=1,
+        le=128,
+        description="Batch size for CBIR indexing"
+    )
+    
+    # Output parameters
+    output_dir: Optional[str] = Field(
+        default=None,
+        description="Directory to save results (uses temp if not provided)"
+    )
+
+
+class IndexingStatus(BaseModel):
+    """Status of image indexing in CBIR."""
+    total_images: int = Field(description="Total images provided")
+    already_indexed: int = Field(description="Images already visible in CBIR")
+    newly_indexed: int = Field(description="Images indexed during this request")
+    failed_to_index: int = Field(description="Images that failed to index")
+    failed_ids: List[str] = Field(default_factory=list, description="IDs of failed images")
+
+
+class ExtractionStatus(BaseModel):
+    """Status of descriptor extraction."""
+    total_images: int = Field(description="Total images needing descriptors")
+    extracted: int = Field(description="Successfully extracted")
+    from_cache: int = Field(description="Loaded from disk cache")
+    failed: int = Field(description="Failed extractions")
+
+
+class MatchingStatus(BaseModel):
+    """Status of matching process."""
+    total_pairs_checked: int = Field(description="Total image pairs checked")
+    matched_pairs: int = Field(description="Pairs with valid matches")
+    expansion_count: int = Field(description="Number of CBIR expansions performed")
+
+
+class MicroserviceAnalysisResponse(BaseModel):
+    """Response from provenance analysis microservice."""
+    success: bool = Field(description="Whether analysis completed successfully")
+    message: str = Field(description="Status message")
+    
+    # Timing
+    processing_time_seconds: float = Field(
+        default=0.0, 
+        description="Total processing time"
+    )
+    
+    # Status details
+    indexing_status: Optional[IndexingStatus] = Field(
+        default=None,
+        description="CBIR indexing status"
+    )
+    extraction_status: Optional[ExtractionStatus] = Field(
+        default=None,
+        description="Descriptor extraction status"
+    )
+    matching_status: Optional[MatchingStatus] = Field(
+        default=None,
+        description="Matching process status"
+    )
+    
+    # Results
+    graph: Optional[ProvenanceGraphResult] = Field(
+        default=None,
+        description="Provenance graph result"
+    )
+    matched_pairs: Optional[List[ProvenanceMatchedPair]] = Field(
+        default=None,
+        description="List of matched image pairs"
+    )
+    
+    # Debug/logging info
+    warnings: List[str] = Field(
+        default_factory=list,
+        description="Any warnings during processing"
+    )
+
+
+class HealthCheckResponse(BaseModel):
+    """Health check response."""
+    status: str = Field(description="Service status")
+    version: str = Field(default="1.0.0", description="Service version")
+    cbir_connected: bool = Field(description="CBIR connection status")
+
