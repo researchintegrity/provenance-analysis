@@ -284,11 +284,15 @@ class ProvenanceMicroservice:
                 # Perform matching (apply path mapping for image loading)
                 try:
                     match_start = time.time()
+                    image1_path = source_img.path if Path(source_img.path).exists() \
+                                  else self._apply_path_mapping(source_img.path)
+                    image2_path = target_img.path if Path(target_img.path).exists() \
+                                  else self._apply_path_mapping(target_img.path)
                     match_result = match_images(
-                        image1_path=self._apply_path_mapping(source_img.path),
+                        image1_path=image1_path,
                         keypoints1=desc1['keypoints'],
                         descriptors1=desc1['descriptors'],
-                        image2_path=self._apply_path_mapping(target_img.path),
+                        image2_path=image2_path,
                         keypoints2=desc2['keypoints'],
                         descriptors2=desc2['descriptors'],
                         flip_keypoints1=desc1.get('flip_keypoints'),

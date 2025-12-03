@@ -186,7 +186,7 @@ class DescriptorManager:
                 return cached
             
             # Apply path mapping to get the actual file path
-            actual_path = self._apply_path_mapping(task.image_path)
+            actual_path = task.image_path if Path(task.image_path).exists() else self._apply_path_mapping(task.image_path)
             
             # Extract descriptors
             logger.info(f"Extracting descriptors for {image_id} using {task.descriptor_type.value}")
