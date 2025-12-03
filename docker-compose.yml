@@ -29,7 +29,6 @@ services:
     environment:
       # CBIR connection - connects to existing CBIR service
       - CBIR_ENDPOINT=${CBIR_ENDPOINT:-http://host.docker.internal:8001}
-      - CBIR_USER_ID=${CBIR_USER_ID:-provenance_service}
       # Output directory for descriptors
       - PROVENANCE_OUTPUT_DIR=/app/output
       # Path mapping (container paths)
