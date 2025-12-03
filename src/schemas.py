@@ -336,6 +336,12 @@ class MicroserviceAnalysisRequest(BaseModel):
     5. Perform matching and expansion (Top-Q)
     6. Build provenance graph
     """
+    # User identification (required for CBIR isolation)
+    user_id: str = Field(
+        ...,
+        description="User ID for CBIR multi-tenant isolation. Each user has their own image index."
+    )
+    
     # Input images
     images: List[MicroserviceImageInput] = Field(
         ..., 

@@ -356,7 +356,7 @@ class RestCBIRClient(CBIRClient):
             payload = {
                 "user_id": self.user_id,
                 "image_path": self._map_path(query_image_path),
-                "top_k": k
+                "top_k": k+1
             }
             
             # Add filter if provided
@@ -379,16 +379,21 @@ class RestCBIRClient(CBIRClient):
             mapped_results = []
             seen_ids = set()  # Track seen IDs to deduplicate
             
+            k_results=0
             for res in results:
                 path = res.get('image_path')
                 if not path:
                     continue
+                if path == query_image_path:
+                    continue  # Skip self-match
                 
-                # Unmap path
-                local_path = self._unmap_path(path)
+                
+                # Keep path as-is (container path from CBIR)
+                # TODO: Here we can use the unmapped path if needed
+                container_path = path
                     
                 # Create ID from filename
-                img_id = Path(local_path).stem
+                img_id = Path(container_path).stem
                 
                 # Skip duplicates - keep only the first (highest scoring) result per ID
                 if img_id in seen_ids:
@@ -401,11 +406,15 @@ class RestCBIRClient(CBIRClient):
                 
                 mapped_results.append({
                     "id": img_id,
-                    "path": local_path,
+                    "path": container_path,
                     "score": res.get('distance', 0.0),
                     "metadata": res
                 })
-            
+
+                # Limit to k results
+                k_results += 1
+                if k_results >= k:
+                    break
             return mapped_results
             
         except Exception as e:

@@ -110,7 +110,10 @@ class ProvenanceMicroservice:
         # Build image lookup
         all_images = {img.id: img for img in request.images}
         all_images[request.query_image.id] = request.query_image
-        image_ids = set(all_images.keys())
+        # Create filter IDs based on filename stems (matching CBIR client ID generation)
+        image_ids = {Path(img.path).stem for img in all_images.values()}
+        # Create mapping from stem back to original ID for CBIR results
+        stem_to_id = {Path(img.path).stem: img.id for img in all_images.values()}
         
         logger.info(f"Starting provenance analysis with {len(all_images)} images")
         
@@ -200,16 +203,19 @@ class ProvenanceMicroservice:
             # Process Top-K candidates
             priority = 1
             for cand in top_k_candidates:
+                # Map CBIR result ID (stem) back to original ID
+                original_id = stem_to_id.get(cand['id'], cand['id'])
+                
                 # Get image info (may be from CBIR or from our list)
-                cand_img = all_images.get(cand['id'])
+                cand_img = all_images.get(original_id)
                 if cand_img is None:
-                    # CBIR returned an image not in our list, use CBIR data
+                    # CBIR returned an image not in our list, use CBIR data but with correct ID
                     cand_img = MicroserviceImageInput(
-                        id=cand['id'],
+                        id=original_id,
                         path=cand['path'],
                         label=cand.get('label')
                     )
-                    all_images[cand['id']] = cand_img
+                    all_images[original_id] = cand_img
                 
                 # Add to graph
                 graph_builder.add_node(
@@ -328,7 +334,8 @@ class ProvenanceMicroservice:
                             total_cbir_expansion_time += time.time() - expansion_start
                             
                             for sub_cand in top_q_candidates:
-                                sub_cand_id = sub_cand['id']
+                                # Map CBIR result ID (stem) back to original ID
+                                sub_cand_id = stem_to_id.get(sub_cand['id'], sub_cand['id'])
                                 
                                 # Skip if same as source
                                 if sub_cand_id == task.source_id:

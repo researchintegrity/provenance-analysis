@@ -4,23 +4,21 @@ Provenance Analysis Microservice API.
 FastAPI-based REST API for provenance analysis with async processing.
 """
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import List, Dict
 import uvicorn
 import os
 import logging
-from pathlib import Path
 
-from .service import ProvenanceMicroservice, ProvenanceService
+from .service import ProvenanceMicroservice
 from .cbir import MockCBIRClient, RestCBIRClient, CBIRClient
 from .schemas import (
     MicroserviceAnalysisRequest,
     MicroserviceAnalysisResponse,
     MicroserviceImageInput,
     HealthCheckResponse,
-    DescriptorType,
 )
 
 # Configure logging
@@ -34,9 +32,8 @@ logger = logging.getLogger(__name__)
 # Configuration
 # ============================================================================
 
-OUTPUT_DIR = os.getenv("PROVENANCE_OUTPUT_DIR", "/tmp/provenance_output")
+OUTPUT_DIR = os.getenv("PROVENANCE_OUTPUT_DIR", "/provenance_output")
 CBIR_ENDPOINT = os.getenv("CBIR_ENDPOINT", "http://localhost:8001")
-CBIR_USER_ID = os.getenv("CBIR_USER_ID", "provenance_service")
 USE_MOCK_CBIR = os.getenv("USE_MOCK_CBIR", "false").lower() == "true"
 
 # Path mapping for CBIR (local path -> remote path)
@@ -85,36 +82,50 @@ app.add_middleware(
 # Service Initialization
 # ============================================================================
 
-def get_cbir_client() -> CBIRClient:
-    """Get the appropriate CBIR client based on configuration."""
+def get_cbir_client(user_id: str) -> CBIRClient:
+    """Get the appropriate CBIR client based on configuration.
+    
+    Args:
+        user_id: User ID for CBIR multi-tenant isolation
+    """
     if USE_MOCK_CBIR:
         logger.info("Using Mock CBIR client")
         return MockCBIRClient()
     else:
-        logger.info(f"Using REST CBIR client: {CBIR_ENDPOINT}")
+        logger.info(f"Using REST CBIR client: {CBIR_ENDPOINT} for user: {user_id}")
         return RestCBIRClient(
             endpoint_url=CBIR_ENDPOINT,
-            user_id=CBIR_USER_ID,
+            user_id=user_id,
             path_mapping=PATH_MAPPING if PATH_MAPPING else None
         )
 
-# Global service instance
-_cbir_client: Optional[CBIRClient] = None
-_service: Optional[ProvenanceMicroservice] = None
+# Cache for CBIR clients per user
+_cbir_clients: Dict[str, CBIRClient] = {}
 
-def get_service() -> ProvenanceMicroservice:
-    """Get or create the service instance."""
-    global _cbir_client, _service
+def get_service(user_id: str) -> ProvenanceMicroservice:
+    """Get or create a service instance for the given user.
     
-    if _service is None:
-        _cbir_client = get_cbir_client()
-        _service = ProvenanceMicroservice(
-            cbir_client=_cbir_client,
-            default_output_dir=OUTPUT_DIR
-        )
-        logger.info(f"Initialized ProvenanceMicroservice with output dir: {OUTPUT_DIR}")
+    Args:
+        user_id: User ID for CBIR multi-tenant isolation
+        
+    Returns:
+        ProvenanceMicroservice configured for the user
+    """
+    global _cbir_clients
     
-    return _service
+    # Get or create CBIR client for this user
+    if user_id not in _cbir_clients:
+        _cbir_clients[user_id] = get_cbir_client(user_id)
+        logger.info(f"Created new CBIR client for user: {user_id}")
+    
+    # Create a new service instance with the user's CBIR client
+    service = ProvenanceMicroservice(
+        cbir_client=_cbir_clients[user_id],
+        default_output_dir=OUTPUT_DIR
+    )
+    logger.info(f"Initialized ProvenanceMicroservice for user {user_id} with output dir: {OUTPUT_DIR}")
+    
+    return service
 
 # ============================================================================
 # API Endpoints
@@ -135,6 +146,7 @@ async def analyze_provenance(request: MicroserviceAnalysisRequest):
     7. Build and return the provenance graph
     
     **Request Body:**
+    - `user_id`: User ID for CBIR multi-tenant isolation (required)
     - `images`: List of available images with id, path, and optional label
     - `query_image`: The query image to analyze
     - `k`: Number of top candidates from initial CBIR search (default: 10)
@@ -149,72 +161,12 @@ async def analyze_provenance(request: MicroserviceAnalysisRequest):
     - Processing status and timing
     """
     try:
-        service = get_service()
+        service = get_service(request.user_id)
         response = service.analyze(request)
         return response
     except Exception as e:
         logger.error(f"Analysis failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
-
-
-# ============================================================================
-# Legacy Endpoint (Backward Compatibility)
-# ============================================================================
-
-class LegacyImageItem(BaseModel):
-    """Legacy image item format."""
-    id: str
-    path: str
-    label: Optional[str] = None
-
-
-class LegacyAnalysisRequest(BaseModel):
-    """Legacy analysis request format."""
-    query_image_id: str
-    available_images: List[LegacyImageItem]
-    k: int = 10
-    q: int = 5
-    max_depth: int = 3
-    descriptor_type: DescriptorType = DescriptorType.CV_RSIFT
-
-
-@app.post("/analyze/legacy")
-async def analyze_provenance_legacy(request: LegacyAnalysisRequest):
-    """
-    Legacy endpoint for backward compatibility.
-    
-    Converts old request format to new microservice format.
-    """
-    # Find query image
-    query_img = next(
-        (img for img in request.available_images if img.id == request.query_image_id), 
-        None
-    )
-    if not query_img:
-        raise HTTPException(
-            status_code=404, 
-            detail="Query image not found in available images"
-        )
-    
-    # Convert to new format
-    new_request = MicroserviceAnalysisRequest(
-        images=[
-            MicroserviceImageInput(id=img.id, path=img.path, label=img.label)
-            for img in request.available_images
-            if img.id != request.query_image_id
-        ],
-        query_image=MicroserviceImageInput(
-            id=query_img.id, 
-            path=query_img.path, 
-            label=query_img.label
-        ),
-        k=request.k,
-        q=request.q,
-        max_depth=request.max_depth,
-        descriptor_type=request.descriptor_type
-    )
-    
-    return await analyze_provenance(new_request)
 
 
 # ============================================================================
@@ -231,13 +183,11 @@ def health_check():
     cbir_connected = False
     
     try:
-        # Get or create CBIR client and check connectivity
-        global _cbir_client
-        if _cbir_client is None:
-            _cbir_client = get_cbir_client()
+        # Create a temporary CBIR client to check connectivity
+        temp_client = get_cbir_client("health_check")
         
         # Try a health check on the CBIR client
-        health_info = _cbir_client.health_check()
+        health_info = temp_client.health_check()
         cbir_connected = health_info.get("healthy", False)
     except Exception as e:
         logger.warning(f"CBIR health check failed: {e}")
@@ -257,9 +207,13 @@ def get_config():
     return {
         "output_dir": OUTPUT_DIR,
         "cbir_endpoint": CBIR_ENDPOINT if not USE_MOCK_CBIR else "mock",
-        "cbir_user_id": CBIR_USER_ID,
         "use_mock_cbir": USE_MOCK_CBIR,
-        "path_mapping": PATH_MAPPING
+        "path_mapping": PATH_MAPPING,
+        "active_users": list(_cbir_clients.keys()),
+        "user_cbir_clients": {
+            user_id: type(client).__name__
+            for user_id, client in _cbir_clients.items()
+        }
     }
 
 
@@ -269,6 +223,7 @@ def get_config():
 
 class IndexImagesRequest(BaseModel):
     """Request to index images in CBIR."""
+    user_id: str
     images: List[MicroserviceImageInput]
     batch_size: int = 32
 
@@ -281,7 +236,7 @@ async def index_images(request: IndexImagesRequest):
     Useful for pre-indexing images before analysis.
     """
     try:
-        service = get_service()
+        service = get_service(request.user_id)
         
         # Convert to dict format for CBIR
         images = [
@@ -304,6 +259,7 @@ async def index_images(request: IndexImagesRequest):
 
 class CheckVisibilityRequest(BaseModel):
     """Request to check image visibility in CBIR."""
+    user_id: str
     image_ids: List[str]
 
 
@@ -313,7 +269,7 @@ async def check_visibility(request: CheckVisibilityRequest):
     Check which images are visible in the CBIR system.
     """
     try:
-        service = get_service()
+        service = get_service(request.user_id)
         visibility = service.cbir.check_visibility(request.image_ids)
         
         return {
