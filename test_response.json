@@ -1,0 +1,525 @@
+{
+    "success": true,
+    "message": "Analysis completed successfully",
+    "processing_time_seconds": 47.83988094329834,
+    "indexing_status": {
+        "total_images": 10,
+        "already_indexed": 10,
+        "newly_indexed": 0,
+        "failed_to_index": 0,
+        "failed_ids": []
+    },
+    "extraction_status": {
+        "total_images": 10,
+        "extracted": 10,
+        "from_cache": 0,
+        "failed": 0
+    },
+    "matching_status": {
+        "total_pairs_checked": 28,
+        "matched_pairs": 16,
+        "expansion_count": 8
+    },
+    "graph": {
+        "nodes": [
+            {
+                "id": "img1",
+                "label": "Prov-test",
+                "image_path": "/workspace/cbir-test/01978.png",
+                "is_query": true,
+                "metadata": {}
+            },
+            {
+                "id": "img10",
+                "label": "Prov-test",
+                "image_path": "/workspace/cbir-test/01261.png",
+                "is_query": false,
+                "metadata": {}
+            },
+            {
+                "id": "img6",
+                "label": "Prov-test",
+                "image_path": "/workspace/cbir-test/00424.png",
+                "is_query": false,
+                "metadata": {}
+            },
+            {
+                "id": "img9",
+                "label": "Prov-test",
+                "image_path": "/workspace/cbir-test/01126.png",
+                "is_query": false,
+                "metadata": {}
+            },
+            {
+                "id": "img3",
+                "label": "Prov-test",
+                "image_path": "/workspace/cbir-test/00068.png",
+                "is_query": false,
+                "metadata": {}
+            },
+            {
+                "id": "img7",
+                "label": "Prov-test",
+                "image_path": "/workspace/cbir-test/00971.png",
+                "is_query": false,
+                "metadata": {}
+            },
+            {
+                "id": "img5",
+                "label": "Prov-test",
+                "image_path": "/workspace/cbir-test/00273.png",
+                "is_query": false,
+                "metadata": {}
+            },
+            {
+                "id": "img4",
+                "label": "Prov-test",
+                "image_path": "/workspace/cbir-test/00084.png",
+                "is_query": false,
+                "metadata": {}
+            },
+            {
+                "id": "img8",
+                "label": "Prov-test",
+                "image_path": "/workspace/cbir-test/01112.png",
+                "is_query": false,
+                "metadata": {}
+            },
+            {
+                "id": "img2",
+                "label": "Prov-test",
+                "image_path": "/workspace/cbir-test/00025.png",
+                "is_query": false,
+                "metadata": {}
+            }
+        ],
+        "edges": [
+            {
+                "source": "img1",
+                "target": "img10",
+                "weight": 0.7954243311581674,
+                "shared_area_source": 0.7954243311581674,
+                "shared_area_target": 0.7686625470558989,
+                "matched_keypoints": 576,
+                "is_flipped": false
+            },
+            {
+                "source": "img1",
+                "target": "img3",
+                "weight": 0.8851651359406362,
+                "shared_area_source": 0.8851651359406362,
+                "shared_area_target": 0.3371572186050992,
+                "matched_keypoints": 632,
+                "is_flipped": false
+            },
+            {
+                "source": "img1",
+                "target": "img4",
+                "weight": 0.7598164866579197,
+                "shared_area_source": 0.7598164866579197,
+                "shared_area_target": 0.3166363916783768,
+                "matched_keypoints": 380,
+                "is_flipped": false
+            },
+            {
+                "source": "img10",
+                "target": "img3",
+                "weight": 0.9001349527665317,
+                "shared_area_source": 0.9001349527665317,
+                "shared_area_target": 0.2961000748722574,
+                "matched_keypoints": 687,
+                "is_flipped": false
+            },
+            {
+                "source": "img3",
+                "target": "img4",
+                "weight": 0.5330397230695411,
+                "shared_area_source": 0.5149985332043137,
+                "shared_area_target": 0.5330397230695411,
+                "matched_keypoints": 876,
+                "is_flipped": false
+            },
+            {
+                "source": "img3",
+                "target": "img2",
+                "weight": 0.3399813476130637,
+                "shared_area_source": 0.3399813476130637,
+                "shared_area_target": 0.15792848714923305,
+                "matched_keypoints": 120,
+                "is_flipped": false
+            },
+            {
+                "source": "img3",
+                "target": "img8",
+                "weight": 0.06451708590412909,
+                "shared_area_source": 0.06255555215005977,
+                "shared_area_target": 0.06451708590412909,
+                "matched_keypoints": 65,
+                "is_flipped": false
+            },
+            {
+                "source": "img3",
+                "target": "img7",
+                "weight": 0.18170314682405894,
+                "shared_area_source": 0.18170314682405894,
+                "shared_area_target": 0.1180708567805342,
+                "matched_keypoints": 30,
+                "is_flipped": false
+            },
+            {
+                "source": "img2",
+                "target": "img8",
+                "weight": 0.9260298568716976,
+                "shared_area_source": 0.9260298568716976,
+                "shared_area_target": 0.9175219506407214,
+                "matched_keypoints": 1111,
+                "is_flipped": false
+            },
+            {
+                "source": "img2",
+                "target": "img7",
+                "weight": 0.8725529048109694,
+                "shared_area_source": 0.5469347971066537,
+                "shared_area_target": 0.8725529048109694,
+                "matched_keypoints": 1299,
+                "is_flipped": false
+            },
+            {
+                "source": "img2",
+                "target": "img5",
+                "weight": 0.8773388386712793,
+                "shared_area_source": 0.3418611809367465,
+                "shared_area_target": 0.8773388386712793,
+                "matched_keypoints": 590,
+                "is_flipped": false
+            },
+            {
+                "source": "img8",
+                "target": "img7",
+                "weight": 0.8219703574542284,
+                "shared_area_source": 0.5113461082107261,
+                "shared_area_target": 0.8219703574542284,
+                "matched_keypoints": 626,
+                "is_flipped": false
+            },
+            {
+                "source": "img8",
+                "target": "img5",
+                "weight": 0.844362608339843,
+                "shared_area_source": 0.3264267916468913,
+                "shared_area_target": 0.844362608339843,
+                "matched_keypoints": 404,
+                "is_flipped": false
+            },
+            {
+                "source": "img7",
+                "target": "img5",
+                "weight": 0.8656585946508946,
+                "shared_area_source": 0.5400095109772529,
+                "shared_area_target": 0.8656585946508946,
+                "matched_keypoints": 601,
+                "is_flipped": false
+            },
+            {
+                "source": "img7",
+                "target": "img9",
+                "weight": 0.44530093562351625,
+                "shared_area_source": 0.29719426171039076,
+                "shared_area_target": 0.44530093562351625,
+                "matched_keypoints": 220,
+                "is_flipped": false
+            },
+            {
+                "source": "img7",
+                "target": "img6",
+                "weight": 0.6675029868578256,
+                "shared_area_source": 0.3406911310137117,
+                "shared_area_target": 0.6675029868578256,
+                "matched_keypoints": 396,
+                "is_flipped": false
+            }
+        ],
+        "spanning_tree_edges": [
+            {
+                "source": "img1",
+                "target": "img3",
+                "weight": 0.8851651359406362,
+                "shared_area_source": 0.8851651359406362,
+                "shared_area_target": 0.3371572186050992,
+                "matched_keypoints": 632,
+                "is_flipped": false
+            },
+            {
+                "source": "img1",
+                "target": "img4",
+                "weight": 0.7598164866579197,
+                "shared_area_source": 0.7598164866579197,
+                "shared_area_target": 0.3166363916783768,
+                "matched_keypoints": 380,
+                "is_flipped": false
+            },
+            {
+                "source": "img10",
+                "target": "img3",
+                "weight": 0.9001349527665317,
+                "shared_area_source": 0.9001349527665317,
+                "shared_area_target": 0.2961000748722574,
+                "matched_keypoints": 687,
+                "is_flipped": false
+            },
+            {
+                "source": "img3",
+                "target": "img2",
+                "weight": 0.3399813476130637,
+                "shared_area_source": 0.3399813476130637,
+                "shared_area_target": 0.15792848714923305,
+                "matched_keypoints": 120,
+                "is_flipped": false
+            },
+            {
+                "source": "img2",
+                "target": "img8",
+                "weight": 0.9260298568716976,
+                "shared_area_source": 0.9260298568716976,
+                "shared_area_target": 0.9175219506407214,
+                "matched_keypoints": 1111,
+                "is_flipped": false
+            },
+            {
+                "source": "img2",
+                "target": "img5",
+                "weight": 0.8773388386712793,
+                "shared_area_source": 0.3418611809367465,
+                "shared_area_target": 0.8773388386712793,
+                "matched_keypoints": 590,
+                "is_flipped": false
+            },
+            {
+                "source": "img2",
+                "target": "img7",
+                "weight": 0.8725529048109694,
+                "shared_area_source": 0.5469347971066537,
+                "shared_area_target": 0.8725529048109694,
+                "matched_keypoints": 1299,
+                "is_flipped": false
+            },
+            {
+                "source": "img7",
+                "target": "img6",
+                "weight": 0.6675029868578256,
+                "shared_area_source": 0.3406911310137117,
+                "shared_area_target": 0.6675029868578256,
+                "matched_keypoints": 396,
+                "is_flipped": false
+            },
+            {
+                "source": "img7",
+                "target": "img9",
+                "weight": 0.44530093562351625,
+                "shared_area_source": 0.29719426171039076,
+                "shared_area_target": 0.44530093562351625,
+                "matched_keypoints": 220,
+                "is_flipped": false
+            }
+        ],
+        "connected_components": [
+            [
+                "img8",
+                "img2",
+                "img10",
+                "img4",
+                "img5",
+                "img9",
+                "img1",
+                "img6",
+                "img3",
+                "img7"
+            ]
+        ],
+        "adjacency_matrix": {
+            "img1": {
+                "img10": 0.7954243311581674,
+                "img3": 0.8851651359406362,
+                "img4": 0.7598164866579197
+            },
+            "img10": {
+                "img1": 0.7686625470558989,
+                "img3": 0.9001349527665317
+            },
+            "img3": {
+                "img1": 0.3371572186050992,
+                "img10": 0.2961000748722574,
+                "img4": 0.5149985332043137,
+                "img2": 0.3399813476130637,
+                "img8": 0.06255555215005977,
+                "img7": 0.18170314682405894
+            },
+            "img4": {
+                "img1": 0.3166363916783768,
+                "img3": 0.5330397230695411
+            },
+            "img2": {
+                "img3": 0.15792848714923305,
+                "img8": 0.9260298568716976,
+                "img7": 0.5469347971066537,
+                "img5": 0.3418611809367465
+            },
+            "img8": {
+                "img3": 0.06451708590412909,
+                "img2": 0.9175219506407214,
+                "img7": 0.5113461082107261,
+                "img5": 0.3264267916468913
+            },
+            "img7": {
+                "img3": 0.1180708567805342,
+                "img2": 0.8725529048109694,
+                "img8": 0.8219703574542284,
+                "img5": 0.5400095109772529,
+                "img9": 0.29719426171039076,
+                "img6": 0.3406911310137117
+            },
+            "img5": {
+                "img2": 0.8773388386712793,
+                "img8": 0.844362608339843,
+                "img7": 0.8656585946508946
+            },
+            "img9": {
+                "img7": 0.44530093562351625
+            },
+            "img6": {
+                "img7": 0.6675029868578256
+            }
+        }
+    },
+    "matched_pairs": [
+        {
+            "image1_id": "img1",
+            "image2_id": "img10",
+            "shared_area_img1": 0.7954243311581674,
+            "shared_area_img2": 0.7686625470558989,
+            "matched_keypoints": 576,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img1",
+            "image2_id": "img3",
+            "shared_area_img1": 0.8851651359406362,
+            "shared_area_img2": 0.3371572186050992,
+            "matched_keypoints": 632,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img1",
+            "image2_id": "img4",
+            "shared_area_img1": 0.7598164866579197,
+            "shared_area_img2": 0.3166363916783768,
+            "matched_keypoints": 380,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img10",
+            "image2_id": "img3",
+            "shared_area_img1": 0.9001349527665317,
+            "shared_area_img2": 0.2961000748722574,
+            "matched_keypoints": 687,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img3",
+            "image2_id": "img4",
+            "shared_area_img1": 0.5149985332043137,
+            "shared_area_img2": 0.5330397230695411,
+            "matched_keypoints": 876,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img3",
+            "image2_id": "img2",
+            "shared_area_img1": 0.3399813476130637,
+            "shared_area_img2": 0.15792848714923305,
+            "matched_keypoints": 120,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img3",
+            "image2_id": "img8",
+            "shared_area_img1": 0.06255555215005977,
+            "shared_area_img2": 0.06451708590412909,
+            "matched_keypoints": 65,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img3",
+            "image2_id": "img7",
+            "shared_area_img1": 0.18170314682405894,
+            "shared_area_img2": 0.1180708567805342,
+            "matched_keypoints": 30,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img2",
+            "image2_id": "img8",
+            "shared_area_img1": 0.9260298568716976,
+            "shared_area_img2": 0.9175219506407214,
+            "matched_keypoints": 1111,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img2",
+            "image2_id": "img7",
+            "shared_area_img1": 0.5469347971066537,
+            "shared_area_img2": 0.8725529048109694,
+            "matched_keypoints": 1299,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img2",
+            "image2_id": "img5",
+            "shared_area_img1": 0.3418611809367465,
+            "shared_area_img2": 0.8773388386712793,
+            "matched_keypoints": 590,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img8",
+            "image2_id": "img7",
+            "shared_area_img1": 0.5113461082107261,
+            "shared_area_img2": 0.8219703574542284,
+            "matched_keypoints": 626,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img8",
+            "image2_id": "img5",
+            "shared_area_img1": 0.3264267916468913,
+            "shared_area_img2": 0.844362608339843,
+            "matched_keypoints": 404,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img7",
+            "image2_id": "img5",
+            "shared_area_img1": 0.5400095109772529,
+            "shared_area_img2": 0.8656585946508946,
+            "matched_keypoints": 601,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img7",
+            "image2_id": "img9",
+            "shared_area_img1": 0.29719426171039076,
+            "shared_area_img2": 0.44530093562351625,
+            "matched_keypoints": 220,
+            "is_flipped": false
+        },
+        {
+            "image1_id": "img7",
+            "image2_id": "img6",
+            "shared_area_img1": 0.3406911310137117,
+            "shared_area_img2": 0.6675029868578256,
+            "matched_keypoints": 396,
+            "is_flipped": false
+        }
+    ],
+    "warnings": []
+}
